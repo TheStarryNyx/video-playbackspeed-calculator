@@ -11,10 +11,22 @@ root.geometry("300x450")  # Set window size
 tasks = []
 total_time = 0
 
+def set_playback_speed():
+    global total_time
+
+    playback_speed = playback_speed_entry.get()
+    if not playback_speed:
+        playback_speed = 1.0
+    playback_speed = float(playback_speed)
+
+    speed_time_label['text'] = str(datetime.timedelta(seconds=int(round(total_time /playback_speed))))
+    return float(playback_speed)
+
 def add_duration():
     """Adds a task to the list."""
 
     global total_time
+    global playback_speed
     seconds = seconds_entry.get()  # Get task from the entry field
     minutes = minutes_entry.get()
     hours = hours_entry.get()
@@ -32,7 +44,7 @@ def add_duration():
         task_listbox.insert(tk.END, str(datetime.timedelta(seconds=time)))  # Display task in the listbox
         total_time += int(time)
         total_time_label['text'] = str(datetime.timedelta(seconds=int(total_time)))
-        speed_time_label['text'] = str(datetime.timedelta(seconds=int(round(total_time/1.75))))
+        speed_time_label['text'] = str(datetime.timedelta(seconds=int(round(total_time/set_playback_speed()))))
         seconds_entry.delete(0, tk.END)  # Clear input field
         minutes_entry.delete(0, tk.END)
         hours_entry.delete(0, tk.END)
@@ -43,11 +55,12 @@ def add_duration():
 def remove_duration():
     """Removes selected task from the list."""
     global total_time
+    global playback_speed
     try:
         selected_task_index = task_listbox.curselection()[0]  # Get index of selected task
         total_time -= int(tasks[selected_task_index])
         total_time_label['text'] = str(datetime.timedelta(seconds=total_time))
-        speed_time_label['text'] = str(datetime.timedelta(seconds=int(round(total_time/1.75))))
+        speed_time_label['text'] = str(datetime.timedelta(seconds=int(round(total_time/set_playback_speed()))))
         task_listbox.delete(selected_task_index)  # Remove task from listbox
         del tasks[selected_task_index]  # Remove task from the list
 
@@ -62,6 +75,10 @@ root.rowconfigure(3, weight=2)
 root.rowconfigure(4, weight=2)
 root.rowconfigure(5, weight=2)
 root.rowconfigure(6, weight=2)
+root.rowconfigure(7, weight=2)
+root.rowconfigure(8, weight=2)
+root.rowconfigure(9, weight=2)
+
 root.columnconfigure(0, weight=2)
 root.columnconfigure(1, weight=2)
 root.columnconfigure(2, weight=2)
@@ -87,34 +104,46 @@ seconds_entry_label = tk.Label(root, width=12, height=1, text="Seconds:")
 seconds_entry_label.config(state='disabled')
 seconds_entry_label.grid(column=2,row=0)
 
+playback_speed_label = tk.Label(root, width=20, height=1, text="Playback speed:")
+playback_speed_label.config(state='disabled')
+playback_speed_label.grid(column=0,row=2, columnspan=3)
+
+default_playback_speed = tk.StringVar(value="1.0")
+playback_speed_entry = tk.Entry(root, width=12, textvariable=default_playback_speed)  # Input field for entering tasks
+playback_speed_entry.grid(column=0,row=3,columnspan=3)
+
 total_time_label = tk.Label(root, width=20, height=1, text="Total time:")
 total_time_label.config(state='disabled')
-total_time_label.grid(column=0,row=2)
+total_time_label.grid(column=0,row=4)
 
 total_time_label = tk.Label(root, width=20, height=1, text=str(datetime.timedelta(seconds=total_time)))
 total_time_label.config(state='disabled')
-total_time_label.grid(column=0,row=3)
+total_time_label.grid(column=0,row=5)
 
 speed_time_label = tk.Label(root, width=20, height=1, text="Sped up time:")
 speed_time_label.config(state='disabled')
-speed_time_label.grid(column=2,row=2)
+speed_time_label.grid(column=2,row=4)
 
 speed_time_label = tk.Label(root, width=20, height=1, text=str(datetime.timedelta(seconds=round(total_time/1.75))))
 speed_time_label.config(state='disabled')
-speed_time_label.grid(column=2,row=3)
+speed_time_label.grid(column=2,row=5)
 
 arrow = tk.Label(root, width=20, height=1, text="-->")
 arrow.config(state='disabled')
-arrow.grid(column=1,row=2,rowspan=2)
+arrow.grid(column=1,row=4,rowspan=2)
+
+update_playback_speed_button = tk.Button(root, text="Update playback speed", command=set_playback_speed)  # Button to add tasks
+update_playback_speed_button.grid(column=0,row=8,columnspan=3)  # Display the button
 
 add_button = tk.Button(root, text="Add duration", command=add_duration)  # Button to add tasks
-add_button.grid(column=0,row=4,columnspan=3)  # Display the button
+add_button.grid(column=0,row=6,columnspan=3)  # Display the button
 
 remove_button = tk.Button(root, text="Remove duration", command=remove_duration)  # Button to remove tasks
-remove_button.grid(column=0,row=5,columnspan=3)  # Display the button
+remove_button.grid(column=0,row=7,columnspan=3)  # Display the button
 
 task_listbox = tk.Listbox(root, width=40, height=15)  # Listbox to display tasks
-task_listbox.grid(column=0,row=6,columnspan=3)  # Add spacing around the listbox
+task_listbox.grid(column=0,row=9,columnspan=3)  # Add spacing around the listbox
 
 # Run the application
+
 root.mainloop()
